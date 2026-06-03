@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0a0a0a"/>
+  <defs>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8c97e"/>
+      <stop offset="100%" stop-color="#c9a84c"/>
+    </linearGradient>
+  </defs>
+  <!-- Octagon shape -->
+  <polygon points="256,56 376,100 436,216 436,296 376,412 256,456 136,412 76,296 76,216 136,100" fill="none" stroke="url(#accent)" stroke-width="8" opacity="0.85"/>
+  <!-- IQ text -->
+  <text x="256" y="228" text-anchor="middle" font-family="Georgia, serif" font-size="104" font-weight="bold" fill="url(#accent)">IQ</text>
+  <!-- Fight subtitle -->
+  <text x="256" y="308" text-anchor="middle" font-family="Georgia, serif" font-size="40" fill="#888" letter-spacing="18">FIGHT</text>
+  <circle cx="160" cy="396" r="10" fill="#e8c97e" opacity="0.4"/>
+  <circle cx="352" cy="396" r="10" fill="#e8c97e" opacity="0.4"/>
+</svg>
