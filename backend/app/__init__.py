@@ -1,0 +1,2 @@
+"""Fight IQ backend application."""
+
