@@ -18,6 +18,13 @@
   --amber: #ffb341;
   --blue: #4da3ff;
   --critical: #ff5a5f;
+  --surface-hover: #1d1f24;
+  --panel-border: rgba(232,232,232,0.12);
+  --panel-highlight: rgba(255,255,255,0.065);
+  --red-soft: rgba(255,83,61,0.12);
+  --red-ring: rgba(255,83,61,0.3);
+  --shadow-panel: 0 24px 70px rgba(0,0,0,0.36);
+  --shadow-tight: 0 12px 34px rgba(0,0,0,0.28);
 }
 
 html, body, #root {
@@ -63,6 +70,12 @@ body::before {
 
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid rgba(255,83,61,0.9);
+  outline-offset: 3px;
+}
 
 /* ── App Shell ── */
 .app-shell {
@@ -923,7 +936,7 @@ button, input, select, textarea { font: inherit; cursor: pointer; }
   align-items: center;
   justify-content: center;
   gap: 7px;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0 14px;
   border: 0;
   border-radius: 8px;
@@ -931,14 +944,25 @@ button, input, select, textarea { font: inherit; cursor: pointer; }
   font-weight: 800;
   font-size: 0.84rem;
   white-space: nowrap;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, border-color 0.15s, background-color 0.15s, transform 0.15s;
 }
 
 .primary-action {
   background: linear-gradient(180deg, #ff5a4a, #e82f20);
 }
 
-.primary-action:disabled { opacity: 0.7; cursor: wait; }
+.primary-action:hover:not(:disabled),
+.secondary-action:hover:not(:disabled),
+.search-box button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.primary-action:disabled,
+.secondary-action:disabled,
+.search-box button:disabled {
+  opacity: 0.58;
+  filter: saturate(0.8);
+}
 
 .secondary-action {
   border: 1px solid rgba(255,255,255,0.1);
@@ -2120,6 +2144,14 @@ button, input, select, textarea { font: inherit; cursor: pointer; }
   background: transparent;
 }
 
+.search-box:focus-within {
+  border-color: rgba(255,83,61,0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 0 0 3px rgba(255,83,61,0.1),
+    0 18px 52px rgba(0,0,0,0.32);
+}
+
 /* ── Bottom Nav ── */
 .bottom-nav {
   position: fixed;
@@ -2151,6 +2183,12 @@ button, input, select, textarea { font: inherit; cursor: pointer; }
 }
 
 .bottom-nav a.active { color: var(--red); }
+
+.bottom-nav a:hover,
+.bottom-nav a:focus-visible {
+  color: #fff;
+  background: rgba(255,255,255,0.05);
+}
 
 /* ── Spin animation ── */
 .spin { animation: spin 1s linear infinite; }
@@ -2228,7 +2266,7 @@ button, input, select, textarea { font: inherit; cursor: pointer; }
     display: flex;
     align-items: center;
     gap: 10px;
-    min-height: 42px;
+    min-height: 44px;
     padding: 0 12px;
     border-radius: 8px;
     color: var(--muted);
@@ -2894,6 +2932,24 @@ button, input, select, textarea { font: inherit; cursor: pointer; }
 .add-intel-form textarea:focus {
   outline: none;
   border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(255,83,61,0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .primary-action:hover:not(:disabled),
+  .secondary-action:hover:not(:disabled),
+  .search-box button:hover:not(:disabled) {
+    transform: none;
+  }
 }
 
 .add-intel-actions {
@@ -2979,4 +3035,255 @@ button, input, select, textarea { font: inherit; cursor: pointer; }
   color: var(--text);
   font-size: 0.82rem;
   line-height: 1.35;
+}
+
+/* Impeccable product polish pass: preserve FightIQ's existing dark fight-night identity. */
+.panel,
+.event-row,
+.fight-row,
+.history-row,
+.admin-tile,
+.admin-action-band,
+.empty-state,
+.search-box,
+.run-banner,
+.signal-form,
+.hero-fight,
+.fight-hero,
+.history-accuracy-dashboard,
+.history-event-card {
+  border-color: var(--panel-border);
+  background:
+    linear-gradient(150deg, var(--panel-highlight), rgba(255,255,255,0.012)),
+    rgba(17,18,20,0.92);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    var(--shadow-panel);
+}
+
+.event-row,
+.fight-row,
+.event-fight-row,
+.history-event-header,
+.history-fight-row,
+.review-history-item {
+  transition: background-color 0.16s ease-out, border-color 0.16s ease-out, transform 0.16s ease-out;
+}
+
+.event-row:hover,
+.fight-row:hover,
+.event-fight-row:hover,
+.history-event-header:hover,
+.review-history-item:hover {
+  border-color: rgba(255,83,61,0.2);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025)),
+    var(--surface-hover);
+}
+
+.event-row:hover,
+.fight-row:hover,
+.review-history-item:hover {
+  transform: translateY(-1px);
+}
+
+.section-header {
+  padding-top: 2px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.section-header h2 {
+  letter-spacing: 0.035em;
+}
+
+.section-header a,
+.dashboard-actions a {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+}
+
+.event-showcase {
+  border-color: rgba(255,83,61,0.18);
+  background:
+    linear-gradient(145deg, rgba(255,83,61,0.045), rgba(255,255,255,0.015)),
+    rgba(11,12,14,0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    0 30px 90px rgba(0,0,0,0.48);
+}
+
+.event-showcase .hero-fight,
+.fight-hero {
+  background:
+    linear-gradient(165deg, rgba(8,8,9,0.98), rgba(8,8,9,0.6)),
+    radial-gradient(ellipse at 72% 18%, rgba(255,255,255,0.18), transparent 21%),
+    radial-gradient(ellipse at 30% 88%, rgba(255,83,61,0.15), transparent 32%),
+    linear-gradient(135deg, rgba(20,21,24,0.98), rgba(5,5,6,0.99));
+}
+
+.fight-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 0 46%, rgba(255,255,255,0.035) 46% 46.4%, transparent 46.4% 100%),
+    linear-gradient(65deg, transparent 0 54%, rgba(255,255,255,0.025) 54% 54.35%, transparent 54.35% 100%);
+  opacity: 0.72;
+}
+
+.fight-topline span {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  background: rgba(10,10,11,0.5);
+}
+
+.fighter-name strong,
+.hero-matchup strong,
+.hero-matchup b,
+.ai-prediction-card > strong {
+  text-shadow: 0 10px 28px rgba(0,0,0,0.38);
+}
+
+.fighter-name span,
+.fighter-name small,
+.fight-topline,
+.hero-footer,
+.event-fight-row small,
+.event-row span,
+.event-row small,
+.fight-row span {
+  color: #b8b8b8;
+}
+
+.win-gauge {
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    inset 0 0 0 10px rgba(255,255,255,0.025),
+    0 0 0 1px rgba(255,83,61,0.08),
+    0 22px 56px rgba(0,0,0,0.42),
+    0 0 42px rgba(255,83,61,0.12);
+}
+
+.win-gauge::before {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255,255,255,0.045), transparent 36%),
+    #0a0a0b;
+}
+
+.ai-prediction-card {
+  border-color: rgba(255,83,61,0.2);
+  background:
+    linear-gradient(145deg, rgba(255,83,61,0.075), rgba(255,255,255,0.018)),
+    rgba(17,18,20,0.94);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    var(--shadow-tight);
+}
+
+.ai-prediction-card > span,
+.card-section-title,
+.panel-title span {
+  color: #ff725f;
+}
+
+.prediction-pills div,
+.odds-board div,
+.history-acc-stat,
+.review-stat {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.012)),
+    rgba(10,10,11,0.62);
+}
+
+.primary-action {
+  box-shadow: 0 12px 28px rgba(232,47,32,0.22);
+}
+
+.secondary-action:hover:not(:disabled) {
+  border-color: rgba(255,83,61,0.28);
+}
+
+.bottom-nav {
+  box-shadow: 0 -18px 48px rgba(0,0,0,0.42);
+}
+
+.bottom-nav a.active {
+  background: rgba(255,83,61,0.1);
+}
+
+.confidence-badge,
+.accuracy-badge,
+.predicted-badge,
+.prediction-version {
+  border: 1px solid currentColor;
+  border-color: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+.history-accuracy-dashboard {
+  background:
+    linear-gradient(150deg, rgba(52,199,89,0.055), rgba(255,255,255,0.015)),
+    rgba(17,18,20,0.92);
+}
+
+.history-event-card {
+  overflow: hidden;
+}
+
+.run-banner {
+  border-color: rgba(255,83,61,0.18);
+}
+
+.search-box {
+  min-height: 54px;
+}
+
+@media (min-width: 900px) {
+  .desktop-sidebar {
+    background:
+      linear-gradient(180deg, rgba(255,83,61,0.045), transparent 24%),
+      rgba(10,10,11,0.92);
+  }
+
+  .desktop-sidebar a.active {
+    box-shadow: inset 0 0 0 1px rgba(255,83,61,0.12);
+  }
+
+  .fight-page .fight-hero {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.07),
+      0 34px 100px rgba(0,0,0,0.48);
+  }
+}
+
+@media (max-width: 899px) {
+  .panel,
+  .event-row,
+  .fight-row,
+  .history-row,
+  .admin-tile,
+  .admin-action-band,
+  .empty-state,
+  .search-box,
+  .run-banner,
+  .signal-form,
+  .fight-hero {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.055),
+      0 16px 42px rgba(0,0,0,0.28);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-row:hover,
+  .fight-row:hover,
+  .review-history-item:hover {
+    transform: none;
+  }
 }
