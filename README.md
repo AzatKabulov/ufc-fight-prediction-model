@@ -1,200 +1,133 @@
-# UFC Fight Prediction Model
+# FightIQ · UFC Fight Prediction Model
 
-FightIQ is a full-stack UFC fight prediction and analytics project. It combines fighter statistics, matchup-specific feature engineering, fight-week intelligence, betting market signals, and model tracking into one workflow for generating and reviewing fight predictions.
+A full-stack MMA analytics project for exploring UFC cards, comparing fighters, generating predictions, and reviewing results over time.
 
-The goal is not to make a simple "pick the favorite" app. The project is built around a more realistic prediction pipeline:
+FightIQ brings fighter statistics, matchup features, fight-week intelligence, and market context into one dashboard. Predictions retain their model version and supporting data so you can revisit what the system knew before a fight.
 
-- collect and normalize fighter, event, fight, and odds data
-- build time-aware matchup features without leaking future results
-- generate win, method, confidence, and key-factor outputs
-- track prediction accuracy after events finish
-- keep a history of model versions and prediction versions
+**React + TypeScript · FastAPI · SQLAlchemy · scikit-learn**
 
-This repository contains the backend API, frontend dashboard, scraper services, model utilities, tests, and project documentation.
+[Quick start](#quick-start) · [How it works](#how-it-works) · [Run guide](docs/run-website.md) · [Prediction rules](PREDICTION_RULES.md)
 
-## What It Does
+## Preview
 
-- Predicts UFC fight winners with a model-backed probability.
-- Builds matchup features from striking, grappling, durability, cardio, style, age, Elo, and recent-form signals.
-- Stores fight-week intelligence such as injury, weight-cut, camp, and weigh-in signals.
-- Integrates market odds as an informational model-vs-market signal.
-- Tracks prediction accuracy by event, confidence level, method, round bucket, and model version.
-- Provides a web UI for upcoming cards, fight analysis, prediction history, and admin workflows.
+![FightIQ desktop dashboard showing the event showcase and fight card](docs/images/dashboard-desktop.png)
 
-## Tech Stack
+<details>
+<summary>View the mobile dashboard</summary>
 
-```text
-Frontend    React, TypeScript, Vite, Tailwind CSS
-Backend     Python, FastAPI, SQLAlchemy, Alembic
-Database    SQLite for local development, PostgreSQL-compatible schema for deployment
-ML          scikit-learn-style training pipeline, persisted model artifacts
-Scraping    UFCStats/news/odds service adapters
-Testing     Python unittest suite and Vite production build
+<img src="docs/images/dashboard-mobile.png" alt="FightIQ mobile dashboard with event details, fight card, and bottom navigation" width="390" />
+
+</details>
+
+Screenshots of the running frontend with built-in demo data, captured at 1440 × 1000 and 390 × 844. Event names, matchups, and relative dates are sample content, not a live UFC schedule or measured prediction results. See [screenshot notes](docs/images/README.md).
+
+## What you can explore
+
+- **Events and matchups:** browse cards, compare fighter profiles, and analyze individual fights or a card.
+- **Prediction context:** inspect win probabilities, confidence, method leans, and key factors.
+- **Fight-week intelligence:** collect or enter injury, camp, weight-cut, and weigh-in signals.
+- **Market comparisons:** compare model probabilities with implied odds and line movement.
+- **Prediction history:** preserve prediction versions and inspect accuracy after results are recorded.
+
+The repository includes the API, frontend, data collectors, training utilities, migrations, and backend tests. A fresh checkout does not include a trained model or historical dataset; local databases and model artifacts are generated separately.
+
+## Quick start
+
+You need Git, Python with `venv`, and Node.js with npm. These commands use PowerShell; the [full guide](docs/run-website.md) also covers macOS/Linux and phone access. The pinned backend dependencies were installed with Python 3.14 on Windows for this documentation refresh.
+
+```powershell
+git clone https://github.com/AzatKabulov/ufc-fight-prediction-model.git
+cd ufc-fight-prediction-model
 ```
 
-## Repository Structure
-
-```text
-backend/    FastAPI app, database models, services, migrations, tests
-frontend/   Vite React app and mobile-first prediction UI
-docs/       Architecture notes and local run instructions
-ml/         Model artifact location and training notes
-data/       Local development data folders
-scrapers/   Scraper notes and source-specific adapters
-```
-
-## Core Backend Areas
-
-```text
-app/services/analyzer.py              Prediction assembly and explanation logic
-app/services/feature_builder.py       Matchup feature construction
-app/services/modeling.py              Model training and version registration
-app/services/training_pipeline.py     Time-aware training dataset generation
-app/services/elo_system.py            Chronological Elo features
-app/services/odds_service.py          Odds persistence and current market state
-app/services/line_movement.py         Line movement and sharp-money detection
-app/services/intelligence.py          Fight-week signal handling
-app/services/accuracy_engine.py       Post-event accuracy computation
-app/services/results_recorder.py      Fight result ingestion workflow
-app/routers/history.py                Accuracy/history API endpoints
-```
-
-## Prediction Pipeline
-
-At a high level, a fight prediction goes through this flow:
-
-```text
-fighters + fight context
-        |
-        v
-feature builder
-        |
-        v
-winner model or heuristic fallback
-        |
-        v
-data quality dampening
-        |
-        v
-fight-week intel adjustment
-        |
-        v
-market context and edge calculation
-        |
-        v
-prediction output, confidence, method lean, key factors
-```
-
-The app keeps base probability, adjusted probability, market probability, and final displayed probability separate so later accuracy analysis can show which layer helped or hurt.
-
-## Local Setup
-
-### Backend
-
-From the repository root:
+### 1. Start the API
 
 ```powershell
 cd backend
 python -m venv .venv
 .\.venv\Scripts\python -m pip install -r requirements.txt
+Copy-Item .env.example .env
 .\.venv\Scripts\python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8010
 ```
 
-Backend URL:
+Startup creates a local SQLite database and seed records. Open the [health check](http://127.0.0.1:8010/health) or [interactive API docs](http://127.0.0.1:8010/docs).
 
-```text
-http://127.0.0.1:8010
-```
+### 2. Start the dashboard
 
-The backend uses `sqlite:///./fightiq.db` by default for local development. To use Postgres, set `DATABASE_URL` in your environment or in a local `.env` file based on `backend/.env.example`.
-
-### Frontend
-
-Open a second terminal:
+In a second terminal, from the repository root:
 
 ```powershell
 cd frontend
-npm install
-npm run dev
+npm ci
+Copy-Item .env.example .env.local
+npm run dev -- --host 127.0.0.1
 ```
 
-Frontend URL:
+Open [FightIQ locally](http://127.0.0.1:5179). Copy environment examples only on first setup to avoid overwriting your local settings.
 
-```text
-http://127.0.0.1:5179
+For a visual preview, you can run just the frontend. The events view falls back to bundled sample data when its API request fails. Fight details, analysis, history, and admin operations need a working backend; offline fallback does not cover every screen.
+
+### 3. Explore the workflow
+
+1. Browse the seeded card to inspect the interface.
+2. Choose **Sync UFC Events** to request source-backed upcoming events. This requires network access and availability of the source site.
+3. Open a future booked fight and run analysis. The backend refreshes available fighter data, builds features, and saves a prediction.
+4. Use prediction history and result-recording workflows to review completed fights.
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[Fighter statistics and fight context] --> B[Matchup features]
+    B --> C[Trained winner model or heuristic fallback]
+    C --> D[Data quality and fight-week adjustments]
+    D --> E[Market context]
+    E --> F[Versioned prediction]
+    F --> G[Result recording and accuracy review]
 ```
 
-The frontend includes fallback seed data, so the UI can still be reviewed when the backend is not running.
+Historical training and on-demand analysis are separate workflows. The code includes chronological feature construction, Elo features, model registration, and rolling holdout validation. When a suitable trained model is unavailable, analysis can use a heuristic fallback. Displayed probabilities alone are not evidence of validated predictive accuracy.
 
-## Useful Commands
+The system keeps base, adjusted, and market-related probabilities distinct for later comparison. See [architecture](docs/architecture.md), [model notes](ml/README.md), and [prediction rules](PREDICTION_RULES.md) for implementation details and intended methodology.
 
-Run the backend test suite:
+## Project map
+
+| Location | Purpose |
+| --- | --- |
+| [`frontend/`](frontend/) | React dashboard, API client, and bundled preview data |
+| [`backend/app/main.py`](backend/app/main.py) | FastAPI routes and startup |
+| [`backend/app/services/`](backend/app/services/) | Features, predictions, collectors, odds, and result tracking |
+| [`backend/migrations/`](backend/migrations/) | Alembic database migrations |
+| [`backend/tests/`](backend/tests/) | Python unittest suite |
+| [`docs/`](docs/) | Architecture, setup instructions, and screenshots |
+| [`ml/`](ml/) | Training notes and artifact directory |
+| [`scrapers/`](scrapers/) | Collector notes; active adapters live in backend services |
+| [`PRODUCT.md`](PRODUCT.md) | Product purpose and design principles |
+
+## Verify your checkout
+
+From `backend/`, with dependencies installed:
 
 ```powershell
-cd backend
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python -m unittest discover -s tests -v
 ```
 
-Build the frontend:
+From `frontend/`:
 
 ```powershell
-cd frontend
 npm run build
 ```
 
-Refresh upcoming events:
+The frontend build checks TypeScript and produces a Vite bundle. The backend suite covers API, feature, model, odds, training, and source-parsing workflows. Check test counts and results on the version you run.
 
-```text
-POST http://127.0.0.1:8010/events/upcoming/refresh?limit=12
-```
+## Status and limitations
 
-Analyze a fight:
+FightIQ is a personal research and portfolio project. Data coverage, source availability, model artifacts, and validation quality affect its outputs. Market signals are included for analysis; there is no published performance guarantee.
 
-```text
-POST http://127.0.0.1:8010/fights/{fight_id}/analyze
-```
+The current setup is intended for local development. Admin routes do not currently enforce the configured `ADMIN_API_KEY`; setting it alone does not secure the API. Authentication and access controls need implementation before public hosting. Without APScheduler, the fallback scheduler registers jobs but does not execute periodic work; APScheduler is not included in the pinned requirements.
 
-Refresh fight-week intelligence:
+Near-term work includes broader historical coverage, dependency maintenance, better fighter identity matching, and comparisons of model-only, intelligence-adjusted, and market-blended outputs.
 
-```text
-POST http://127.0.0.1:8010/fights/{fight_id}/intelligence/refresh
-```
+## Contributing
 
-Inspect feature values:
-
-```text
-GET http://127.0.0.1:8010/fights/{fight_id}/features
-```
-
-Train or refresh the baseline model:
-
-```text
-POST http://127.0.0.1:8010/admin/retrain-model
-```
-
-## Verification Status
-
-Before this version was committed, the project was checked with:
-
-```text
-Backend tests: 45 passed
-Frontend build: passed
-```
-
-Generated files, local databases, environment files, logs, screenshots, and model artifacts are intentionally ignored by Git.
-
-## Notes On Odds And Edge
-
-The odds and edge features are included as analytical signals only. The app calculates model-vs-market disagreement, line movement, and implied probabilities, but it does not provide betting recommendations or bankroll advice.
-
-## Roadmap
-
-- Expand historical odds backfills for more completed fights.
-- Improve fighter profile completeness for lower-profile upcoming bouts.
-- Add richer post-event accuracy dashboards.
-- Compare model-only, intel-adjusted, and market-blended probabilities over time.
-- Move local development data into a managed Postgres deployment for production use.
-
-## Project Status
-
-This is an active personal ML/analytics project. The codebase is structured like a real application rather than a notebook experiment: services are separated, migrations are included, tests cover the main workflows, and prediction history is designed to be auditable after events finish.
+Open an issue with reproduction steps for a bug or the intended outcome for an improvement. Keep pull requests focused, run checks relevant to the change, and include screenshots for UI updates. Use synthetic examples rather than committing local databases, API keys, or generated model artifacts.
